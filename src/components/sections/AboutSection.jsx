@@ -88,6 +88,7 @@ export default function About() {
             
             return (
             <FeatureCard
+            key={index}
             feature={feature}
             index={index}
             />
