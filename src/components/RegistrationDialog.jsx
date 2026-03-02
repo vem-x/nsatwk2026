@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, MapPin, CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { X, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { useRegistration } from '@/contexts/RegistrationContext';
 
 const ROLES = [
@@ -14,28 +14,16 @@ const ROLES = [
   { value: 'government', label: 'Government Official' },
 ];
 
-function Field({ label, children }) {
-  return (
-    <div className="space-y-1.5">
-      <label className="block text-[11px] font-semibold uppercase tracking-widest text-gray-500">
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-}
-
 const inputClass =
-  'w-full bg-dark-200/60 border border-white/10 rounded-lg px-4 py-3 text-white text-sm placeholder-gray-600 transition-all duration-200 focus:outline-none focus:border-primary/60 focus:bg-[#1e1e1e] autofill:bg-dark-200';
+  'w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-4 py-3 text-white text-sm placeholder-white/20 transition-colors duration-150 focus:outline-none focus:border-primary/50 focus:bg-white/[0.06]';
 
 export default function RegistrationDialog() {
-  const { showRegistrationPopup, setShowRegistrationPopup } = useRegistration();
+  const { showRegistrationPopup, setShowRegistrationPopup, registrationSource } = useRegistration();
   const [form, setForm] = useState({ name: '', email: '', organization: '', role: 'attendee' });
-  const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const firstInputRef = useRef(null);
 
-  // Focus first input when opened
   useEffect(() => {
     if (showRegistrationPopup) {
       setTimeout(() => firstInputRef.current?.focus(), 150);
@@ -44,7 +32,6 @@ export default function RegistrationDialog() {
     }
   }, [showRegistrationPopup]);
 
-  // Close on Escape
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === 'Escape') setShowRegistrationPopup(false);
@@ -67,10 +54,9 @@ export default function RegistrationDialog() {
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, source: registrationSource || 'direct' }),
       });
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error || 'Registration failed');
       setStatus('success');
     } catch (err) {
@@ -79,194 +65,150 @@ export default function RegistrationDialog() {
     }
   }
 
+  const close = () => setShowRegistrationPopup(false);
+
   return (
     <AnimatePresence>
       {showRegistrationPopup && (
-        <>
+        <motion.div
+          key="registration-modal"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[60]"
+        >
           {/* Backdrop */}
-          <motion.div
-            key="backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md"
-            onClick={() => setShowRegistrationPopup(false)}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={close}
           />
 
-          {/* Panel */}
+          {/* Dialog */}
           <motion.div
-            key="panel"
-            initial={{ opacity: 0, scale: 0.97, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: 16 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[61] flex items-center justify-center p-4 pointer-events-none"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className="relative w-full max-w-3xl pointer-events-auto bg-dark-100 rounded-2xl border border-white/8 overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.8),0_0_0_1px_rgba(8,146,89,0.1)]"
+              className="relative w-full max-w-md pointer-events-auto bg-dark-100 rounded-xl border border-white/[0.08] shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Top gradient accent line */}
-              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
-
-              {/* Close button */}
+              {/* Close */}
               <button
-                onClick={() => setShowRegistrationPopup(false)}
-                className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center border border-white/10 text-gray-500 hover:text-white hover:border-white/30 transition-all duration-200"
+                onClick={close}
+                className="absolute top-4 right-4 z-10 text-white/30 hover:text-white/70 transition-colors"
               >
-                <X size={15} />
+                <X size={18} />
               </button>
 
-              <div className="flex flex-col md:flex-row min-h-[520px]">
-                {/* ── Left Panel ── */}
-                <div className="relative flex-shrink-0 md:w-[240px] bg-[#0d0d0d] border-b md:border-b-0 md:border-r border-white/8 p-7 flex flex-col justify-between overflow-hidden">
-                  {/* grid bg */}
-                  <div className="absolute inset-0 grid-bg opacity-30" />
-                  {/* glow orb */}
-                  <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-
-                  <div className="relative z-10">
-                    <img src="/logo.png" alt="NSATWK" className="h-10 w-auto mb-6" />
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary mb-2">
-                      2nd Annual Event
-                    </p>
-                    <h2 className="font-display text-xl font-bold text-white leading-snug mb-1">
-                      Nigerian Satellite Week
-                    </h2>
-                    <p className="text-primary font-display font-semibold text-sm mb-5">
-                      NSATWK2026
-                    </p>
-                    <p className="text-gray-500 text-xs leading-relaxed">
-                      Harnessing AI & Space Technologies for Nigeria's Digital Economy.
-                    </p>
-                  </div>
-
-                  <div className="relative z-10 space-y-3 mt-6 md:mt-0">
-                    <div className="flex items-start gap-2.5">
-                      <Calendar size={13} className="text-primary mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-0.5">Date</p>
-                        <p className="text-white text-xs font-medium">Feb 26–28, 2026</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2.5">
-                      <MapPin size={13} className="text-primary mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-0.5">Venue</p>
-                        <p className="text-white text-xs font-medium">Abuja Continental Hotel</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── Right Panel ── */}
-                <div className="flex-1 p-7 md:p-9 flex flex-col justify-center">
+              <div className="p-6 sm:p-8">
+                <AnimatePresence mode="wait">
                   {status === 'success' ? (
-                    <SuccessState name={form.name} onClose={() => setShowRegistrationPopup(false)} />
+                    <SuccessState key="success" name={form.name} onClose={close} />
                   ) : (
-                    <>
-                      <div className="mb-7">
-                        <h3 className="font-display text-2xl font-bold text-white mb-1">
-                          Secure your seat
-                        </h3>
-                        <p className="text-gray-500 text-sm">
-                          Register now for Africa's premier satellite technology event.
+                    <motion.div
+                      key="form"
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      {/* Header */}
+                      <div className="mb-6">
+                        <p className="text-primary text-xs font-medium tracking-wide mb-2">
+                          NSATWK 2026 · Feb 26–28, Abuja
                         </p>
+                        <h3 className="font-display text-xl font-bold text-white">
+                          Register for Nigerian Satellite Week
+                        </h3>
                       </div>
 
+                      {/* Form */}
                       <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <Field label="Full Name">
-                            <input
-                              ref={firstInputRef}
-                              type="text"
-                              placeholder="Your full name"
-                              value={form.name}
-                              onChange={set('name')}
-                              required
-                              className={inputClass}
-                            />
-                          </Field>
-
-                          <Field label="Email Address">
-                            <input
-                              type="email"
-                              placeholder="you@example.com"
-                              value={form.email}
-                              onChange={set('email')}
-                              required
-                              className={inputClass}
-                            />
-                          </Field>
+                        <div>
+                          <input
+                            ref={firstInputRef}
+                            type="text"
+                            placeholder="Full name"
+                            value={form.name}
+                            onChange={set('name')}
+                            required
+                            className={inputClass}
+                          />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <Field label="Organization">
-                            <input
-                              type="text"
-                              placeholder="Company or institution"
-                              value={form.organization}
-                              onChange={set('organization')}
-                              className={inputClass}
-                            />
-                          </Field>
+                        <div>
+                          <input
+                            type="email"
+                            placeholder="Email address"
+                            value={form.email}
+                            onChange={set('email')}
+                            required
+                            className={inputClass}
+                          />
+                        </div>
 
-                          <Field label="Attending as">
-                            <select
-                              value={form.role}
-                              onChange={set('role')}
-                              className={`${inputClass} cursor-pointer`}
-                            >
-                              {ROLES.map((r) => (
-                                <option key={r.value} value={r.value} className="bg-dark-200">
-                                  {r.label}
-                                </option>
-                              ))}
-                            </select>
-                          </Field>
+                        <div className="grid grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            placeholder="Organization"
+                            value={form.organization}
+                            onChange={set('organization')}
+                            className={inputClass}
+                          />
+                          <select
+                            value={form.role}
+                            onChange={set('role')}
+                            className={`${inputClass} cursor-pointer`}
+                          >
+                            {ROLES.map((r) => (
+                              <option key={r.value} value={r.value} className="bg-dark-200">
+                                {r.label}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
                         {status === 'error' && (
                           <motion.p
-                            initial={{ opacity: 0, y: -4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-red-400 text-xs py-2 px-3 rounded-lg bg-red-500/10 border border-red-500/20"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="text-red-400 text-xs py-2.5 px-3 rounded-lg bg-red-500/10 border border-red-500/15"
                           >
                             {errorMsg}
                           </motion.p>
                         )}
 
-                        <div className="pt-2">
-                          <button
-                            type="submit"
-                            disabled={status === 'loading'}
-                            className="w-full sm:w-auto btn-primary flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                          >
-                            {status === 'loading' ? (
-                              <>
-                                <Loader2 size={16} className="animate-spin" />
-                                Registering…
-                              </>
-                            ) : (
-                              <>
-                                Register Now
-                                <ArrowRight size={16} />
-                              </>
-                            )}
-                          </button>
-                          <p className="text-gray-600 text-[11px] mt-3">
-                            A confirmation email will be sent to your address.
-                          </p>
-                        </div>
+                        <button
+                          type="submit"
+                          disabled={status === 'loading'}
+                          className="w-full btn-primary flex items-center justify-center gap-2 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {status === 'loading' ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              Registering…
+                            </>
+                          ) : (
+                            <>
+                              Register
+                              <ArrowRight size={15} />
+                            </>
+                          )}
+                        </button>
                       </form>
-                    </>
+
+                      <p className="text-white/20 text-[11px] text-center mt-4">
+                        We'll send a confirmation to your email.
+                      </p>
+                    </motion.div>
                   )}
-                </div>
+                </AnimatePresence>
               </div>
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );
@@ -275,49 +217,34 @@ export default function RegistrationDialog() {
 function SuccessState({ name, onClose }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.96 }}
+      initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="flex flex-col items-center justify-center text-center py-8 h-full"
+      transition={{ duration: 0.3 }}
+      className="flex flex-col items-center text-center py-6"
     >
-      {/* Animated check ring */}
-      <div className="relative mb-6">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
-          className="w-16 h-16 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.25 }}
-          >
-            <CheckCircle size={30} className="text-primary" />
-          </motion.div>
-        </motion.div>
-        {/* Ripple */}
-        <motion.div
-          initial={{ scale: 1, opacity: 0.4 }}
-          animate={{ scale: 2, opacity: 0 }}
-          transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 0.4 }}
-          className="absolute inset-0 rounded-full border border-primary/30"
-        />
-      </div>
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: 'spring', stiffness: 250, damping: 20, delay: 0.1 }}
+        className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center mb-5"
+      >
+        <CheckCircle size={24} className="text-primary" />
+      </motion.div>
 
-      <h3 className="font-display text-2xl font-bold text-white mb-2">You're registered!</h3>
-      <p className="text-gray-400 text-sm max-w-xs mb-1">
-        Welcome, <span className="text-white font-medium">{name}</span>.
-      </p>
-      <p className="text-gray-500 text-sm max-w-xs mb-8">
-        Check your inbox — we've sent a confirmation with all the event details.
+      <h3 className="font-display text-xl font-bold text-white mb-1.5">You're in!</h3>
+      <p className="text-white/40 text-sm mb-8">
+        Welcome, <span className="text-white/70">{name}</span>. Check your inbox for details.
       </p>
 
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
-        <button onClick={onClose} className="flex-1 btn-primary text-center text-sm">
+      <div className="flex gap-3 w-full">
+        <button onClick={onClose} className="flex-1 btn-primary text-sm">
           Done
         </button>
-        <a href="#timeline" onClick={onClose} className="flex-1 btn-secondary text-center text-sm">
+        <a
+          href="#timeline"
+          onClick={onClose}
+          className="flex-1 btn-secondary text-center text-sm"
+        >
           View Agenda
         </a>
       </div>

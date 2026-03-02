@@ -6,9 +6,10 @@ const RegistrationContext = createContext();
 
 export function RegistrationProvider({ children }) {
   const [showRegistrationPopup, setShowRegistrationPopup] = useState(false);
+  const [registrationSource, setRegistrationSource] = useState(null);
 
   return (
-    <RegistrationContext.Provider value={{ showRegistrationPopup, setShowRegistrationPopup }}>
+    <RegistrationContext.Provider value={{ showRegistrationPopup, setShowRegistrationPopup, registrationSource, setRegistrationSource }}>
       {children}
     </RegistrationContext.Provider>
   );

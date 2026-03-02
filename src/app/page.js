@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/sections/HeroSection";
 import AboutSection from "@/components/sections/AboutSection";
@@ -12,10 +13,14 @@ import CountDown from "@/components/sections/CountDown";
 import Footer from "@/components/Footer";
 import { RegistrationProvider } from "@/contexts/RegistrationContext";
 import RegistrationDialog from "@/components/RegistrationDialog";
+import URLRegistrationTrigger from "@/components/URLRegistrationTrigger";
 
 export default function Home() {
   return (
     <RegistrationProvider>
+      <Suspense fallback={null}>
+        <URLRegistrationTrigger />
+      </Suspense>
       <div className="min-h-screen bg-black">
         <RegistrationDialog />
         <Navbar />
