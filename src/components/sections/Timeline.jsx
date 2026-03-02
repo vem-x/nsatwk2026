@@ -1,8 +1,8 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { Clock, User, MapPin } from 'lucide-react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { Clock, User, MapPin, ChevronDown } from 'lucide-react';
 import { fetchSanityData, queries } from '@/lib/sanity';
 import { timelineData as staticData } from '@/data/data';
 
@@ -19,9 +19,44 @@ function groupByDay(events) {
   return { map, order };
 }
 
+function EventItem({ event }) {
+  return (
+    <div className="py-4 space-y-1">
+      <div className="flex items-center gap-2 text-primary text-[11px] font-semibold uppercase tracking-widest">
+        <Clock size={10} />
+        <span>{event.time}</span>
+        {event.venue && (
+          <>
+            <span className="text-white/20">·</span>
+            <MapPin size={10} className="text-gray-600" />
+            <span className="text-gray-500 normal-case tracking-normal font-normal">{event.venue}</span>
+          </>
+        )}
+      </div>
+
+      <h4 className="text-white font-bold text-base leading-snug">{event.title}</h4>
+
+      {event.description && (
+        <p className="text-gray-500 text-sm leading-relaxed">{event.description}</p>
+      )}
+
+      {event.speakerName && (
+        <div className="flex items-center gap-1.5 pt-1">
+          <User size={11} className="text-primary/70" />
+          <span className="text-gray-400 text-xs font-medium">{event.speakerName}</span>
+          {event.speakerTitle && (
+            <span className="text-gray-600 text-xs">· {event.speakerTitle}</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DaySection({ dayKey, events, index, dayRefs }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: false, margin: '-15% 0px -15% 0px' });
+  const [mobileExpanded, setMobileExpanded] = useState(false);
 
   const dayImage = events[0]?.image || '/background.jpg';
   const dayDate = events[0]?.date || '';
@@ -32,21 +67,80 @@ function DaySection({ dayKey, events, index, dayRefs }) {
         ref.current = el;
         if (dayRefs) dayRefs.current[index] = el;
       }}
-      className="py-12 md:py-16 border-t border-white/10 first:border-t-0"
+      className="py-10 md:py-16 first:pt-0"
     >
+      {/* ── MOBILE ─────────────────────────────────────────── */}
+      <div className="md:hidden">
+        {/* Image card / tap target */}
+        <button
+          onClick={() => setMobileExpanded((v) => !v)}
+          className="relative w-full rounded-2xl overflow-hidden focus:outline-none"
+          style={{ aspectRatio: '16/7' }}
+        >
+          <img src={dayImage} alt={dayKey} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+          {/* Day label */}
+          <div className="absolute bottom-0 left-0 p-5 text-left">
+            <span className="text-primary text-[10px] font-semibold uppercase tracking-widest block mb-0.5">
+              {dayDate}
+            </span>
+            <h3 className="text-white text-2xl font-bold leading-tight">{dayKey}</h3>
+          </div>
+
+          {/* Event count */}
+          <div className="absolute top-4 left-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm">
+            <span className="text-white/70 text-xs">{events.length} events</span>
+          </div>
+
+          {/* Expand chevron */}
+          <div className="absolute top-4 right-4">
+            <motion.div
+              animate={{ rotate: mobileExpanded ? 180 : 0 }}
+              transition={{ duration: 0.25 }}
+              className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center"
+            >
+              <ChevronDown size={16} className="text-white/70" />
+            </motion.div>
+          </div>
+
+          {/* Active indicator bar */}
+          {mobileExpanded && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+          )}
+        </button>
+
+        {/* Accordion content */}
+        <AnimatePresence initial={false}>
+          {mobileExpanded && (
+            <motion.div
+              key="events"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="pt-2 pl-4 divide-y divide-white/[0.05]">
+                {events.map((event) => (
+                  <EventItem key={event.id} event={event} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── DESKTOP ────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0.2, y: 20 }}
         transition={{ duration: 0.7, ease: 'easeOut' }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start"
+        className="hidden md:grid grid-cols-2 gap-12 items-start"
       >
-        {/* Left: Image + Day Label */}
+        {/* Left: sticky image */}
         <div className="relative rounded-2xl overflow-hidden aspect-[4/3] md:sticky md:top-24">
-          <img
-            src={dayImage}
-            alt={dayKey}
-            className="w-full h-full object-cover"
-          />
+          <img src={dayImage} alt={dayKey} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
           <div className="absolute bottom-0 left-0 p-6">
@@ -55,68 +149,29 @@ function DaySection({ dayKey, events, index, dayRefs }) {
             </span>
             <h3 className="text-white text-3xl md:text-4xl font-bold leading-tight">{dayKey}</h3>
           </div>
-          {/* Day number indicator */}
-          <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/40 flex items-center justify-center">
+          <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center">
             <span className="text-primary font-bold text-sm">{index + 1}</span>
           </div>
         </div>
 
-        {/* Right: Events List */}
-        <div className="space-y-3">
+        {/* Right: events */}
+        <div className="divide-y divide-white/[0.05]">
           {events.map((event, i) => (
             <motion.div
               key={event.id}
               initial={{ opacity: 0, x: 24 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 24 }}
               transition={{ duration: 0.5, delay: i * 0.08, ease: 'easeOut' }}
-              className="group relative rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-primary/30 transition-all duration-300 overflow-hidden"
+              className="group hover:pl-3 transition-all duration-300"
             >
-              {/* Accent line */}
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary/0 group-hover:bg-primary/60 transition-all duration-300 rounded-l-xl" />
-
-              <div className="p-5 pl-6">
-                {/* Time */}
-                <div className="flex items-center gap-2 text-primary text-xs font-semibold mb-2 uppercase tracking-wider">
-                  <Clock size={12} />
-                  <span>{event.time}</span>
-                  {event.venue && (
-                    <>
-                      <span className="text-white/20">·</span>
-                      <MapPin size={12} className="text-gray-500" />
-                      <span className="text-gray-500 normal-case tracking-normal font-normal">{event.venue}</span>
-                    </>
-                  )}
-                </div>
-
-                {/* Title */}
-                <h4 className="text-white font-semibold text-base md:text-lg leading-snug mb-1 group-hover:text-primary transition-colors duration-300">
-                  {event.title}
-                </h4>
-
-                {/* Description */}
-                {event.description && (
-                  <p className="text-gray-500 text-sm leading-relaxed mt-1">{event.description}</p>
-                )}
-
-                {/* Speaker */}
-                {event.speakerName && (
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/8">
-                    <div className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
-                      <User size={11} className="text-primary" />
-                    </div>
-                    <div>
-                      <span className="text-white text-sm font-medium">{event.speakerName}</span>
-                      {event.speakerTitle && (
-                        <span className="text-gray-500 text-xs ml-2">· {event.speakerTitle}</span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <EventItem event={event} />
             </motion.div>
           ))}
         </div>
       </motion.div>
+
+      {/* Day separator (desktop only) */}
+      <div className="hidden md:block mt-16 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent last:hidden" />
     </div>
   );
 }
@@ -149,7 +204,6 @@ export default function Timeline() {
         }));
         setEventsByDay(groupByDay(formatted));
       } catch (err) {
-        // Fallback to static data
         const formatted = staticData.events.map((e) => ({
           id: e.id,
           day: e.day,
@@ -224,10 +278,10 @@ export default function Timeline() {
               <button
                 key={day}
                 onClick={() => scrollToDay(i)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   activeDay === i
-                    ? 'bg-primary text-black border-primary shadow-[0_0_20px_rgba(0,200,100,0.3)]'
-                    : 'border-white/20 text-gray-400 hover:border-white/40 hover:text-white'
+                    ? 'bg-primary text-black shadow-[0_0_20px_rgba(0,200,100,0.3)]'
+                    : 'text-gray-400 hover:text-white'
                 }`}
               >
                 {day}
