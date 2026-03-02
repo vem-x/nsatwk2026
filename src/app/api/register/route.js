@@ -35,6 +35,12 @@ export async function POST(request) {
 
     if (error) {
       console.error('Supabase error:', error);
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { error: 'This email is already registered. See you at the event!' },
+          { status: 409 }
+        );
+      }
       return NextResponse.json(
         { error: 'Failed to register. Please try again.' },
         { status: 500 }

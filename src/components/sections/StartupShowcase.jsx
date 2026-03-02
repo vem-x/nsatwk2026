@@ -47,10 +47,7 @@ export default function StartupShowcase() {
   const [hoveredOrb, setHoveredOrb] = useState(null);
   const [startupShowcaseData, setStartupShowcaseData] = useState({ title: 'The Startup Showcase (Demo Day)', subtitle: 'Displaying the Urban Lift via Systems', startups: [] });
   const [loading, setLoading] = useState(true);
-  const { showRegistrationPopup, setShowRegistrationPopup } = useRegistration();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null); // 'success' | 'error' | null
-  const [submitMessage, setSubmitMessage] = useState('');
+  const { setShowRegistrationPopup } = useRegistration();
 
   useEffect(() => {
     async function loadStartups() {
@@ -85,54 +82,6 @@ export default function StartupShowcase() {
 
   const closePopup = () => {
     setSelectedStartup(null);
-  };
-
-  const handleRegistrationSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus(null);
-    setSubmitMessage('');
-
-    const formData = new FormData(e.target);
-    const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      organization: formData.get('organization'),
-      role: formData.get('role'),
-    };
-
-    try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSubmitStatus('success');
-        setSubmitMessage(result.message || 'Registration successful!');
-        e.target.reset();
-        // Close popup after 3 seconds
-        setTimeout(() => {
-          setShowRegistrationPopup(false);
-          setSubmitStatus(null);
-          setSubmitMessage('');
-        }, 3000);
-      } else {
-        setSubmitStatus('error');
-        setSubmitMessage(result.error || 'Registration failed. Please try again.');
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      setSubmitStatus('error');
-      setSubmitMessage('An error occurred. Please check your connection and try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   // Generate orbital connection lines for hovered orb only
@@ -483,149 +432,6 @@ export default function StartupShowcase() {
           Hover to see orbital connections, click to learn more about each startup
         </motion.p>
 
-        {/* Registration Popup */}
-        <AnimatePresence>
-          {showRegistrationPopup && (
-            <>
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-                onClick={() => setShowRegistrationPopup(false)}
-              />
-
-              {/* Popup Card */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
-              >
-                <div className="bg-dark-200 border border-primary/30 rounded-2xl overflow-hidden shadow-2xl shadow-primary/20">
-                  {/* Header */}
-                  <div className="relative p-6 bg-gradient-to-br from-primary/20 to-transparent">
-                    <button
-                      onClick={() => setShowRegistrationPopup(false)}
-                      className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-
-                    <h3 className="font-display text-2xl font-bold mb-2">
-                      Register for the Event
-                    </h3>
-                    <p className="text-gray-400 text-sm">
-                      Join us for Nigeria's premier Satellite Week
-                    </p>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-6 space-y-4">
-                    {submitStatus === 'success' ? (
-                      <div className="text-center py-8">
-                        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <h4 className="text-xl font-semibold text-green-500 mb-2">Registration Successful!</h4>
-                        <p className="text-gray-400">{submitMessage}</p>
-                      </div>
-                    ) : (
-                      <form className="space-y-4" onSubmit={handleRegistrationSubmit}>
-                        {submitStatus === 'error' && (
-                          <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-                            <p className="text-red-400 text-sm">{submitMessage}</p>
-                          </div>
-                        )}
-
-                        <div>
-                          <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                            Full Name
-                          </label>
-                          <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            required
-                            disabled={isSubmitting}
-                            className="w-full px-4 py-2 bg-white/5 border border-primary/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            placeholder="Enter your full name"
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                            Email Address
-                          </label>
-                          <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            required
-                            disabled={isSubmitting}
-                            className="w-full px-4 py-2 bg-white/5 border border-primary/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            placeholder="Enter your email"
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="organization" className="block text-sm font-medium text-gray-300 mb-2">
-                            Organization
-                          </label>
-                          <input
-                            type="text"
-                            id="organization"
-                            name="organization"
-                            disabled={isSubmitting}
-                            className="w-full px-4 py-2 bg-white/5 border border-primary/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            placeholder="Your organization (optional)"
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="role" className="block text-sm font-medium text-gray-300 mb-2">
-                            Role
-                          </label>
-                          <select
-                            id="role"
-                            name="role"
-                            disabled={isSubmitting}
-                            className="w-full px-4 py-2 bg-white/5 border border-primary/30 rounded-lg text-white focus:outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <option value="attendee">Attendee</option>
-                            <option value="startup">Startup Founder</option>
-                            <option value="investor">Investor</option>
-                            <option value="mentor">Mentor</option>
-                            <option value="media">Media</option>
-                          </select>
-                        </div>
-
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="w-full py-3 bg-primary text-black font-semibold rounded-lg hover:bg-primary-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                              Processing...
-                            </>
-                          ) : (
-                            'Complete Registration'
-                          )}
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </div>
     </section>
   );
