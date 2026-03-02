@@ -64,7 +64,18 @@ export default {
       title: 'Activities',
       type: 'array',
       of: [{type: 'string'}]
-    }
+    },
+    {
+      name: 'speakerName',
+      title: 'Speaker Name',
+      type: 'string',
+      description: 'Optional speaker for this session',
+    },
+    {
+      name: 'speakerTitle',
+      title: 'Speaker Title / Role',
+      type: 'string',
+    },
   ],
   preview: {
     select: {

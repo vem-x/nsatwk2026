@@ -11,11 +11,13 @@ import Panelist from "@/components/sections/Panelist";
 import CountDown from "@/components/sections/CountDown";
 import Footer from "@/components/Footer";
 import { RegistrationProvider } from "@/contexts/RegistrationContext";
+import RegistrationDialog from "@/components/RegistrationDialog";
 
 export default function Home() {
   return (
     <RegistrationProvider>
       <div className="min-h-screen bg-black">
+        <RegistrationDialog />
         <Navbar />
         <HeroSection />
         <AboutSection />

@@ -22,6 +22,19 @@ export async function fetchSanityData(query, params = {}) {
 
 // GROQ queries for each data type
 export const queries = {
+  siteSettings: `*[_type == "siteSettings"][0] {
+    heroBadge,
+    heroTitle,
+    heroSubtitle,
+    heroTagline,
+    heroDate,
+    heroLocation,
+    heroVideoSrc,
+    eventStartDate,
+    countdownTitle,
+    countdownDescription,
+  }`,
+
   hosts: `*[_type == "host"] | order(_createdAt asc) {
     _id,
     name,
@@ -53,7 +66,9 @@ export const queries = {
     description,
     highlights,
     "image": image.asset->url,
-    activities
+    activities,
+    speakerName,
+    speakerTitle,
   }`,
 
   mentors: `*[_type == "mentor"] | order(_createdAt asc) {

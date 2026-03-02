@@ -154,6 +154,17 @@ export const timelineEventSchema = {
       type: 'array',
       of: [{ type: 'string' }],
     },
+    {
+      name: 'speakerName',
+      title: 'Speaker Name',
+      type: 'string',
+      description: 'Optional speaker for this session',
+    },
+    {
+      name: 'speakerTitle',
+      title: 'Speaker Title / Role',
+      type: 'string',
+    },
   ],
 };
 
@@ -236,7 +247,31 @@ export const panelistCategorySchema = {
   ],
 };
 
+export const siteSettingsSchema = {
+  name: 'siteSettings',
+  title: 'Site Settings',
+  type: 'document',
+  fields: [
+    { name: 'heroBadge', title: 'Hero Badge Text', type: 'string' },
+    { name: 'heroTitle', title: 'Hero Title', type: 'string' },
+    { name: 'heroSubtitle', title: 'Hero Subtitle', type: 'string' },
+    { name: 'heroTagline', title: 'Hero Tagline', type: 'string' },
+    { name: 'heroDate', title: 'Hero Date Display (e.g. Feb 27-28 2026)', type: 'string' },
+    { name: 'heroLocation', title: 'Hero Location', type: 'string' },
+    { name: 'heroVideoSrc', title: 'Hero Background Video URL', type: 'string' },
+    {
+      name: 'eventStartDate',
+      title: 'Event Start Date & Time',
+      type: 'datetime',
+      description: 'Used for the countdown timer',
+    },
+    { name: 'countdownTitle', title: 'Countdown Section Title', type: 'string' },
+    { name: 'countdownDescription', title: 'Countdown Section Description', type: 'text' },
+  ],
+};
+
 export const allSchemas = [
+  siteSettingsSchema,
   hostSchema,
   startupSchema,
   timelineEventSchema,

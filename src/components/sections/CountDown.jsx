@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { countdownData } from '@/data/data';
+import { fetchSanityData, queries } from '@/lib/sanity';
 
 const calculateTimeLeft = (targetDate) => {
   const difference = new Date(targetDate) - new Date();
-  
+
   if (difference <= 0) {
     return { days: 0, hours: 0, minutes: 0, seconds: 0 };
   }
@@ -22,17 +23,38 @@ const calculateTimeLeft = (targetDate) => {
 export default function Countdown() {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
+
+  const [settings, setSettings] = useState({
+    title: countdownData.title,
+    description: countdownData.description,
+    targetDate: countdownData.targetDate,
+    backgroundVideo: countdownData.backgroundVideo,
+  });
+
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(countdownData.targetDate));
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    fetchSanityData(queries.siteSettings)
+      .then((s) => {
+        if (!s) return;
+        setSettings((prev) => ({
+          title: s.countdownTitle || prev.title,
+          description: s.countdownDescription || prev.description,
+          targetDate: s.eventStartDate || prev.targetDate,
+          backgroundVideo: prev.backgroundVideo,
+        }));
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     setMounted(true);
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(countdownData.targetDate));
+      setTimeLeft(calculateTimeLeft(settings.targetDate));
     }, 1000);
-
     return () => clearInterval(timer);
-  }, []);
+  }, [settings.targetDate]);
 
   const timeUnits = [
     { label: 'DAYS', value: timeLeft.days },
@@ -74,10 +96,9 @@ export default function Countdown() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
         >
-          <source src={countdownData.backgroundVideo} type="video/mp4" />
+          <source src={settings.backgroundVideo} type="video/mp4" />
         </video>
-        
-        {/* Dark overlay for better text readability */}
+
         <div className="absolute inset-0 bg-black/40" />
       </div>
 
@@ -90,10 +111,10 @@ export default function Countdown() {
           className="text-center mb-12"
         >
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
-            {countdownData.title}
+            {settings.title}
           </h2>
           <p className="text-gray-300 text-base max-w-xl mx-auto">
-            {countdownData.description}
+            {settings.description}
           </p>
         </motion.div>
 
@@ -105,13 +126,8 @@ export default function Countdown() {
           className="flex flex-wrap justify-center gap-4 md:gap-6"
         >
           {timeUnits.map((unit) => (
-            <motion.div
-              key={unit.label}
-              variants={itemVariants}
-              className="relative"
-            >
-              <div className="relative bg-primary/20 backdrop-blur-sm rounded-xl  px-8 py-6 md:px-12 md:py-8 min-w-[120px] md:min-w-[180px]">
-                {/* Number */}
+            <motion.div key={unit.label} variants={itemVariants} className="relative">
+              <div className="relative bg-primary/20 backdrop-blur-sm rounded-xl px-8 py-6 md:px-12 md:py-8 min-w-[120px] md:min-w-[180px]">
                 <motion.div
                   key={unit.value}
                   initial={{ scale: 1.1, opacity: 0 }}
@@ -123,8 +139,6 @@ export default function Countdown() {
                     {mounted ? String(unit.value).padStart(2, '0') : '00'}
                   </span>
                 </motion.div>
-
-                {/* Label */}
                 <p className="text-gray-400 text-sm md:text-base text-center mt-2 uppercase tracking-widest">
                   {unit.label}
                 </p>

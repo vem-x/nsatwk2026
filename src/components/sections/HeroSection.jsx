@@ -1,10 +1,11 @@
 'use client';
 
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Calendar, MapPin, Download } from 'lucide-react';
 import { heroData } from '@/data/data';
 import { useRegistration } from '@/contexts/RegistrationContext';
+import { fetchSanityData, queries } from '@/lib/sanity';
 
 export default function Hero() {
   const ref = useRef(null);
@@ -16,6 +17,26 @@ export default function Hero() {
 
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
+  const [data, setData] = useState(heroData);
+
+  useEffect(() => {
+    fetchSanityData(queries.siteSettings)
+      .then((settings) => {
+        if (!settings) return;
+        setData({
+          badge: settings.heroBadge || heroData.badge,
+          title: settings.heroTitle || heroData.title,
+          subtitle: settings.heroSubtitle || heroData.subtitle,
+          tagline: settings.heroTagline || heroData.tagline,
+          date: settings.heroDate || heroData.date,
+          location: settings.heroLocation || heroData.location,
+          videoSrc: settings.heroVideoSrc || heroData.videoSrc,
+          ctaButtons: heroData.ctaButtons,
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -39,7 +60,7 @@ export default function Hero() {
 
   return (
     <section ref={ref} className="relative h-screen min-h-[700px] overflow-hidden">
-    
+
       <motion.div style={{ y }} className="absolute inset-0">
         <video
           autoPlay
@@ -49,7 +70,7 @@ export default function Hero() {
           className="w-full h-full object-cover"
           poster="/hero-poster.jpg"
         >
-          <source src={heroData.videoSrc} type="video/mp4" />
+          <source src={data.videoSrc} type="video/mp4" />
         </video>
         {/* Overlay */}
         <div className="absolute inset-0 video-overlay" />
@@ -84,13 +105,11 @@ export default function Hero() {
           {/* Badge */}
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full   mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
           >
-            {/* <div className='w-[100px] h-[2px] bg-white'/> */}
-            <img src="./line.svg" className='md:block hidden'/>
-             SATELLITE WEEK 2026
-               <img src="./line-2.svg" className='md:block hidden'/>
-            
+            <img src="./line.svg" className='md:block hidden' />
+            {data.badge || 'SATELLITE WEEK 2026'}
+            <img src="./line-2.svg" className='md:block hidden' />
           </motion.div>
 
           {/* Title */}
@@ -98,7 +117,7 @@ export default function Hero() {
             variants={itemVariants}
             className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-2 tracking-tight"
           >
-            {heroData.title}
+            {data.title}
           </motion.h1>
 
           {/* Subtitle */}
@@ -106,7 +125,7 @@ export default function Hero() {
             variants={itemVariants}
             className="text-2xl sm:text-3xl md:text-4xl text-primary font-display font-semibold mb-6"
           >
-            {heroData.subtitle}
+            {data.subtitle}
           </motion.p>
 
           {/* Tagline */}
@@ -114,7 +133,7 @@ export default function Hero() {
             variants={itemVariants}
             className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-8"
           >
-            {heroData.tagline}
+            {data.tagline}
           </motion.p>
 
           {/* Event Details */}
@@ -124,11 +143,11 @@ export default function Hero() {
           >
             <div className="flex items-center gap-2 text-gray-300">
               <Calendar className="w-5 h-5 text-primary" />
-              <span>{heroData.date}</span>
+              <span>{data.date}</span>
             </div>
             <div className="flex items-center gap-2 text-gray-300">
               <MapPin className="w-5 h-5 text-primary" />
-              <span>{heroData.location}</span>
+              <span>{data.location}</span>
             </div>
           </motion.div>
 
@@ -137,7 +156,7 @@ export default function Hero() {
             variants={itemVariants}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            {heroData.ctaButtons.map((button, index) => (
+            {data.ctaButtons.map((button) => (
               button.href === '#register' ? (
                 <motion.button
                   key={button.text}
