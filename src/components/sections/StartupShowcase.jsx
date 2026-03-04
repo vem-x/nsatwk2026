@@ -208,7 +208,7 @@ export default function StartupShowcase() {
                     )}
                   </div>
 
-                  {/* Actions */}
+               
                   <div className="flex gap-3 pt-1">
                     {selectedStartup.website && (
                       <a
