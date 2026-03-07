@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 export async function POST(request) {
   try {
@@ -47,14 +55,13 @@ export async function POST(request) {
       );
     }
 
-    // Send confirmation email using Resend
+    // Send confirmation email via SMTP
     try {
-      // Get base URL from environment or use default
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nsatwk.com';
       const logoUrl = `${baseUrl}/logo.png`;
 
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM,
+      await transporter.sendMail({
+        from: `"Nigeria Satellite Week" <${process.env.SMTP_USER}>`,
         to: email,
         subject: '🛰️ Welcome to NSATWK2026 - Registration Confirmed',
         html: `
@@ -203,7 +210,7 @@ export async function POST(request) {
                           </table>
 
                           <p style="color: #999; font-size: 14px; line-height: 1.6; margin: 30px 0 0 0; text-align: center;">
-                            Questions? Contact us at <a href="mailto:info@nsatwk.com" style="color: #089259; text-decoration: none;">info@nsatwk.com</a>
+                            Questions? Contact us at <a href="mailto:satelliteweek@nigcomsat.gov.ng" style="color: #089259; text-decoration: none;">satelliteweek@nigcomsat.gov.ng</a>
                           </p>
                         </td>
                       </tr>
@@ -235,7 +242,6 @@ export async function POST(request) {
     } catch (emailError) {
       console.error('Email sending error:', emailError);
       // Don't fail the registration if email fails
-      // The user is still registered in the database
     }
 
     return NextResponse.json(

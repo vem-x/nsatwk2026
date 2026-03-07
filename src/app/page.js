@@ -9,6 +9,7 @@ import StartupShowcase from "@/components/sections/StartupShowcase";
 import Mentors from "@/components/sections/Mentors";
 import Hosts from "@/components/sections/Hosts";
 import Panelist from "@/components/sections/Panelist";
+import Sponsors from "@/components/sections/Sponsors";
 import CountDown from "@/components/sections/CountDown";
 import Footer from "@/components/Footer";
 import { RegistrationProvider } from "@/contexts/RegistrationContext";
@@ -31,6 +32,7 @@ export default function Home() {
         <Mentors />
         <Hosts />
         <Panelist />
+        <Sponsors />
         <CountDown />
         <Footer />
       </div>

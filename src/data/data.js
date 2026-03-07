@@ -61,96 +61,65 @@ export const aboutData = {
 export const timelineData = {
   title: "Event Timeline",
   events: [
-    {
-      id: 1,
-      day: "Pre-Event",
-      date: "Feb 26, 2026",
-      title: "Satellite Week Cocktail Soiree",
-      time: "6:00PM - 10:00PM",
-      venue: "Transcorp Hilton Hotel Towers",
-      location: "Abuja",
-      description: "An exclusive evening of networking and innovation",
-      highlights: "Stakeholder matchmaking, pitch night keynote, and cocktail reception",
-      image: "/background.jpg",
-      activities: [
-        "Networking cocktail reception",
-        "Stakeholder matchmaking sessions",
-        "Pitch night keynote address"
-      ]
-    },
-    {
-      id: 2,
-      day: "Day 1",
-      date: "Feb 27, 2026",
-      title: "Opening Ceremony & Keynotes",
-      time: "9:00AM - 5:00PM",
-      venue: "Abuja Continental Hotel",
-      location: "Abuja",
-      description: "Kick-off with industry leaders and space tech innovations",
-      highlights: "Welcome address, keynote speeches, and panel discussions on satellite technology trends",
-      image: "/background.jpg",
-      activities: [
-        "Official opening ceremony",
-        "Panel discussions on space tech",
-        "Startup exhibition booths",
-        "Networking lunch"
-      ]
-    },
-    {
-      id: 3,
-      day: "Day 1",
-      date: "Feb 27, 2026",
-      title: "Workshops & Exhibitions",
-      time: "2:00PM - 5:00PM",
-      venue: "Abuja Continental Hotel",
-      location: "Abuja",
-      description: "Interactive sessions and technology showcases",
-      highlights: "Hands-on workshops, startup exhibitions, and technology demonstrations",
-      image: "/background.jpg",
-      activities: [
-        "Technical workshops",
-        "Startup booth exhibitions",
-        "Live product demos",
-        "Q&A sessions"
-      ]
-    },
-    {
-      id: 4,
-      day: "Day 2",
-      date: "Feb 28, 2026",
-      title: "Demo Day & Pitches",
-      time: "9:00AM - 1:00PM",
-      venue: "Abuja Continental Hotel",
-      location: "Abuja",
-      description: "Showcase innovations and pitch to investors",
-      highlights: "Startup demonstrations, investor pitches, and product launches",
-      image: "/background.jpg",
-      activities: [
-        "Startup demo presentations",
-        "Investor pitch sessions",
-        "Product launch announcements",
-        "Networking sessions"
-      ]
-    },
-    {
-      id: 5,
-      day: "Day 2",
-      date: "Feb 28, 2026",
-      title: "Awards & Closing Ceremony",
-      time: "2:00PM - 6:00PM",
-      venue: "Abuja Continental Hotel",
-      location: "Abuja",
-      description: "Celebrate achievements and close the event",
-      highlights: "Awards ceremony, recognition of innovators, and closing remarks",
-      image: "/background.jpg",
-      activities: [
-        "Innovation awards ceremony",
-        "Startup recognition",
-        "Closing keynote address",
-        "Networking reception"
-      ]
-    }
+    // Day 1 — Monday, 30 March 2026 · Accelerator Demo Day
+    { id: 1, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Registration & Accreditation", time: "08:00–09:00", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "NIGCOMSAT Team" },
+    { id: 2, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "MC Introduction & House Notes", time: "09:00–09:05", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Master of Ceremonies" },
+    { id: 3, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Welcome Address", time: "09:05–09:20", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "MD/CEO — Jane Nkechi Egerton-Ideyen" },
+    { id: 4, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Chairman's Address", time: "09:20–09:35", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Hon. Minister of Communications, Innovation & Digital Economy" },
+    { id: 5, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Keynote Address I", time: "09:35–09:50", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Director-General, NITDA" },
+    { id: 6, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Q&A — Keynote Responses", time: "09:50–10:00", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Master of Ceremonies" },
+    { id: 7, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Exhibition Tour & Networking Breakfast", time: "10:00–10:30", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "MD/CEO & Guests" },
+    { id: 8, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Goodwill Messages", time: "10:30–11:00", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Guest of Honour & Distinguished Guests" },
+    { id: 9, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Startup Pitches — Session I", time: "11:00–12:00", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "NIGCOMSAT & Programme Consultants" },
+    { id: 10, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Networking Lunch Break", time: "12:00–13:00", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 11, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Keynote Address II + Q&A", time: "13:00–13:20", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "MD/CEO, SMEDAN" },
+    { id: 12, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Startup Pitches — Session II", time: "13:20–14:20", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Programme Consultant" },
+    { id: 13, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Judges' Feedback & Finalist Reveal", time: "14:20–14:45", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Judges Panel" },
+    { id: 14, day: "Day 1 — Accelerator Demo Day", date: "Mar 30, 2026", title: "Closing Remarks — Day 1", time: "14:45–15:00", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Programme Director & MC" },
+
+    // Day 2 — Tuesday, 31 March 2026 · Stakeholders Forum
+    { id: 15, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "Registration & Networking Breakfast", time: "08:00–09:00", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "NIGCOMSAT Team" },
+    { id: 16, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "MC Introduction & House Notes", time: "09:00–09:05", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Master of Ceremonies" },
+    { id: 17, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "Welcome Address", time: "09:05–09:20", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "MD/CEO — Jane Nkechi Egerton-Ideyen" },
+    { id: 18, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "Keynote Address + Q&A", time: "09:20–09:40", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Chief of Defence Staff" },
+    { id: 19, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "Goodwill Messages", time: "09:40–10:10", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Guest of Honour & Distinguished Guests" },
+    { id: 20, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "Startup Journey Showcase Video", time: "10:10–10:20", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 21, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "Panel Session 1: Technology", time: "10:20–11:20", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "AI & Emerging Satellite Technology · Moderator: NIGCOMSAT (DTH)" },
+    { id: 22, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "Networking & Refreshment Break", time: "11:20–11:35", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 23, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "Panel Session 2: Opportunities", time: "11:35–12:35", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Space Economy Investment · Moderator: ONDI" },
+    { id: 24, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "Spoken Word + Cohort 3.0 Launch", time: "12:35–12:55", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Programme Consultant & MD/CEO" },
+    { id: 25, day: "Day 2 — Stakeholders Forum", date: "Mar 31, 2026", title: "Closing Remarks + Networking Luncheon", time: "12:55–14:30", venue: "Abuja Continental Hotel", image: "/background.jpg", description: "Programme Director" },
+
+    // Gala Night — Tuesday, 31 March 2026 · 18:00–22:30
+    { id: 26, day: "Gala Night", date: "Mar 31, 2026", title: "Arrivals & Red Carpet Reception", time: "18:00–18:30", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 27, day: "Gala Night", date: "Mar 31, 2026", title: "Nigerian Cultural Showcase", time: "18:30–18:50", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 28, day: "Gala Night", date: "Mar 31, 2026", title: "Introductions of Guests & Dignitaries", time: "18:50–19:05", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 29, day: "Gala Night", date: "Mar 31, 2026", title: "Opening Remarks — MD/CEO", time: "19:05–19:15", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 30, day: "Gala Night", date: "Mar 31, 2026", title: "Special Recognition of International Partners", time: "19:15–19:35", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 31, day: "Gala Night", date: "Mar 31, 2026", title: "NIGCOMSAT @20 Documentary Screening", time: "19:35–20:00", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 32, day: "Gala Night", date: "Mar 31, 2026", title: "Chairman's Toast — NIGCOMSAT @20", time: "20:00–20:10", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 33, day: "Gala Night", date: "Mar 31, 2026", title: "Long Service Awards & Anniversary Cake Cutting", time: "20:10–20:40", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 34, day: "Gala Night", date: "Mar 31, 2026", title: "Accelerator & Stakeholder Awards Ceremony", time: "20:40–21:00", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 35, day: "Gala Night", date: "Mar 31, 2026", title: "Gala Dinner & Live Entertainment", time: "21:00–22:00", venue: "Abuja Continental Hotel", image: "/background.jpg" },
+    { id: 36, day: "Gala Night", date: "Mar 31, 2026", title: "Networking & Photography", time: "22:00–22:30", venue: "Abuja Continental Hotel", image: "/background.jpg" },
   ]
+};
+
+// Sponsors Data
+export const sponsorsData = {
+  platinum: [],
+  gold: [],
+  silver: [],
+  government: [
+    { name: "Ministry of Communications", logo: "/logos/ministry.png" },
+    { name: "NITDA", logo: "/logos/nitda.png" },
+    { name: "NARSDA", logo: "/logos/narsda.png" },
+    { name: "NCC", logo: "/logos/ncc.png" },
+    { name: "SMEDAN", logo: "/logos/smedan.png" },
+    { name: "NASENI", logo: "/logos/naseni.png" },
+  ],
+  media: [],
+  supporting: [],
 };
 
 // Startup Showcase Data - Constellation/Solar System style

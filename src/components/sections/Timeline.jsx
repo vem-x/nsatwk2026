@@ -6,19 +6,6 @@ import { Clock, User, MapPin, ChevronDown } from 'lucide-react';
 import { fetchSanityData, queries } from '@/lib/sanity';
 import { timelineData as staticData } from '@/data/data';
 
-function groupByDay(events) {
-  const order = [];
-  const map = {};
-  events.forEach((event) => {
-    if (!map[event.day]) {
-      map[event.day] = [];
-      order.push(event.day);
-    }
-    map[event.day].push(event);
-  });
-  return { map, order };
-}
-
 function EventItem({ event }) {
   return (
     <div className="py-4 space-y-1">
@@ -53,13 +40,16 @@ function EventItem({ event }) {
   );
 }
 
-function DaySection({ dayKey, events, index, dayRefs }) {
+function DaySection({ day, index, dayRefs }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: false, margin: '-15% 0px -15% 0px' });
   const [mobileExpanded, setMobileExpanded] = useState(false);
 
-  const dayImage = events[0]?.image || '/background.jpg';
-  const dayDate = events[0]?.date || '';
+  const dayImage = day.image || '/background.jpg';
+  const dayDate = day.date
+    ? new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : '';
+  const events = day.events || [];
 
   return (
     <div
@@ -71,29 +61,25 @@ function DaySection({ dayKey, events, index, dayRefs }) {
     >
       {/* ── MOBILE ─────────────────────────────────────────── */}
       <div className="md:hidden">
-        {/* Image card / tap target */}
         <button
           onClick={() => setMobileExpanded((v) => !v)}
           className="relative w-full rounded-2xl overflow-hidden focus:outline-none"
           style={{ aspectRatio: '16/7' }}
         >
-          <img src={dayImage} alt={dayKey} className="w-full h-full object-cover" />
+          <img src={dayImage} alt={day.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-          {/* Day label */}
           <div className="absolute bottom-0 left-0 p-5 text-left">
             <span className="text-primary text-[10px] font-semibold uppercase tracking-widest block mb-0.5">
               {dayDate}
             </span>
-            <h3 className="text-white text-2xl font-bold leading-tight">{dayKey}</h3>
+            <h3 className="text-white text-2xl font-bold leading-tight">{day.title}</h3>
           </div>
 
-          {/* Event count */}
           <div className="absolute top-4 left-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm">
             <span className="text-white/70 text-xs">{events.length} events</span>
           </div>
 
-          {/* Expand chevron */}
           <div className="absolute top-4 right-4">
             <motion.div
               animate={{ rotate: mobileExpanded ? 180 : 0 }}
@@ -104,13 +90,11 @@ function DaySection({ dayKey, events, index, dayRefs }) {
             </motion.div>
           </div>
 
-          {/* Active indicator bar */}
           {mobileExpanded && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
           )}
         </button>
 
-        {/* Accordion content */}
         <AnimatePresence initial={false}>
           {mobileExpanded && (
             <motion.div
@@ -122,8 +106,8 @@ function DaySection({ dayKey, events, index, dayRefs }) {
               className="overflow-hidden"
             >
               <div className="pt-2 pl-4 divide-y divide-white/[0.05]">
-                {events.map((event) => (
-                  <EventItem key={event.id} event={event} />
+                {events.map((event, i) => (
+                  <EventItem key={i} event={event} />
                 ))}
               </div>
             </motion.div>
@@ -140,14 +124,14 @@ function DaySection({ dayKey, events, index, dayRefs }) {
       >
         {/* Left: sticky image */}
         <div className="relative rounded-2xl overflow-hidden aspect-[4/3] md:sticky md:top-24">
-          <img src={dayImage} alt={dayKey} className="w-full h-full object-cover" />
+          <img src={dayImage} alt={day.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
           <div className="absolute bottom-0 left-0 p-6">
             <span className="text-primary text-xs font-semibold uppercase tracking-widest block mb-1">
               {dayDate}
             </span>
-            <h3 className="text-white text-3xl md:text-4xl font-bold leading-tight">{dayKey}</h3>
+            <h3 className="text-white text-3xl md:text-4xl font-bold leading-tight">{day.title}</h3>
           </div>
           <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center">
             <span className="text-primary font-bold text-sm">{index + 1}</span>
@@ -158,7 +142,7 @@ function DaySection({ dayKey, events, index, dayRefs }) {
         <div className="divide-y divide-white/[0.05]">
           {events.map((event, i) => (
             <motion.div
-              key={event.id}
+              key={i}
               initial={{ opacity: 0, x: 24 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 24 }}
               transition={{ duration: 0.5, delay: i * 0.08, ease: 'easeOut' }}
@@ -170,14 +154,13 @@ function DaySection({ dayKey, events, index, dayRefs }) {
         </div>
       </motion.div>
 
-      {/* Day separator (desktop only) */}
       <div className="hidden md:block mt-16 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent last:hidden" />
     </div>
   );
 }
 
 export default function Timeline() {
-  const [eventsByDay, setEventsByDay] = useState({ map: {}, order: [] });
+  const [days, setDays] = useState([]);
   const [activeDay, setActiveDay] = useState(0);
   const [loading, setLoading] = useState(true);
   const dayRefs = useRef([]);
@@ -185,38 +168,20 @@ export default function Timeline() {
   useEffect(() => {
     async function load() {
       try {
-        const events = await fetchSanityData(queries.timeline);
-        const formatted = events.map((e) => ({
-          id: e._id,
-          day: e.day,
-          date: new Date(e.date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          }),
-          title: e.title,
-          time: e.time,
-          venue: e.venue,
-          description: e.description,
-          image: e.image || '/background.jpg',
-          speakerName: e.speakerName || null,
-          speakerTitle: e.speakerTitle || null,
-        }));
-        setEventsByDay(groupByDay(formatted));
+        const data = await fetchSanityData(queries.timeline);
+        setDays(data || []);
       } catch (err) {
-        const formatted = staticData.events.map((e) => ({
-          id: e.id,
-          day: e.day,
-          date: e.date,
-          title: e.title,
-          time: e.time,
-          venue: e.venue,
-          description: e.description,
-          image: e.image || '/background.jpg',
-          speakerName: null,
-          speakerTitle: null,
-        }));
-        setEventsByDay(groupByDay(formatted));
+        // Fall back to static data — adapt flat events into day groups
+        const map = {};
+        const order = [];
+        staticData.events.forEach((e) => {
+          if (!map[e.day]) {
+            map[e.day] = { title: e.day, date: e.date, image: e.image || '/background.jpg', events: [] };
+            order.push(e.day);
+          }
+          map[e.day].events.push(e);
+        });
+        setDays(order.map((d) => map[d]));
       } finally {
         setLoading(false);
       }
@@ -228,8 +193,6 @@ export default function Timeline() {
     setActiveDay(index);
     dayRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
-
-  const { map, order } = eventsByDay;
 
   return (
     <section id="timeline" className="relative py-16 md:py-24 bg-[#0a0a0a] text-white">
@@ -267,16 +230,16 @@ export default function Timeline() {
         </div>
 
         {/* Day Tab Navigation */}
-        {!loading && order.length > 0 && (
+        {!loading && days.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="flex justify-center gap-2 sm:gap-3 mb-14 flex-wrap"
           >
-            {order.map((day, i) => (
+            {days.map((day, i) => (
               <button
-                key={day}
+                key={day._id || i}
                 onClick={() => scrollToDay(i)}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   activeDay === i
@@ -284,7 +247,7 @@ export default function Timeline() {
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                {day}
+                {day.title}
               </button>
             ))}
           </motion.div>
@@ -298,11 +261,10 @@ export default function Timeline() {
           </div>
         ) : (
           <div>
-            {order.map((day, index) => (
+            {days.map((day, index) => (
               <DaySection
-                key={day}
-                dayKey={day}
-                events={map[day] || []}
+                key={day._id || index}
+                day={day}
                 index={index}
                 dayRefs={dayRefs}
               />

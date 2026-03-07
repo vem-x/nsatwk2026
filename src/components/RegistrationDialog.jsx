@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { useRegistration } from '@/contexts/RegistrationContext';
+import { fetchSanityData, queries } from '@/lib/sanity';
 
 const ROLES = [
   { value: 'attendee', label: 'General Attendee' },
@@ -22,7 +23,19 @@ export default function RegistrationDialog() {
   const [form, setForm] = useState({ name: '', email: '', organization: '', role: 'attendee' });
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [eventInfo, setEventInfo] = useState({ date: '30–31 Mar 2026', location: 'Abuja' });
   const firstInputRef = useRef(null);
+
+  useEffect(() => {
+    fetchSanityData(queries.siteSettings).then((s) => {
+      if (s) {
+        setEventInfo({
+          date: s.heroDate || '30–31 Mar 2026',
+          location: s.heroLocation || 'Abuja',
+        });
+      }
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (showRegistrationPopup) {
@@ -117,7 +130,7 @@ export default function RegistrationDialog() {
                       {/* Header */}
                       <div className="mb-6">
                         <p className="text-primary text-xs font-medium tracking-wide mb-2">
-                          NSATWK 2026 · Feb 26–28, Abuja
+                          NSATWK 2026 · {eventInfo.date}, {eventInfo.location}
                         </p>
                         <h3 className="font-display text-xl font-bold text-white">
                           Register for Nigerian Satellite Week

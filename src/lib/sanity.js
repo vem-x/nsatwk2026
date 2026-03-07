@@ -55,20 +55,21 @@ export const queries = {
     "logo": logo.asset->url
   }`,
 
-  timeline: `*[_type == "timelineEvent"] | order(date asc) {
+  timeline: `*[_type == "timelineDay"] | order(date asc) {
     _id,
-    day,
-    date,
     title,
-    time,
-    venue,
-    location,
-    description,
-    highlights,
+    date,
     "image": image.asset->url,
-    activities,
-    speakerName,
-    speakerTitle,
+    events[] {
+      title,
+      time,
+      venue,
+      location,
+      description,
+      speakerName,
+      speakerTitle,
+      activities,
+    }
   }`,
 
   mentors: `*[_type == "mentor"] | order(_createdAt asc) {
@@ -87,5 +88,13 @@ export const queries = {
       name,
       "logo": logo.asset->url
     }
+  }`,
+
+  sponsors: `*[_type == "sponsor"] | order(order asc) {
+    _id,
+    name,
+    tier,
+    "logo": logo.asset->url,
+    website,
   }`,
 };

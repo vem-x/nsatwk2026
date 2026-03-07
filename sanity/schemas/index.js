@@ -1,15 +1,17 @@
 import host from './host'
 import startup from './startup'
-import timelineEvent from './timelineEvent'
+import timelineDay from './timelineDay'
 import mentor from './mentor'
 import panelistCategory from './panelistCategory'
 import siteSettings from './siteSettings'
+import sponsor from './sponsor'
 
 export const schemaTypes = [
   siteSettings,
   host,
   startup,
-  timelineEvent,
+  timelineDay,
   mentor,
-  panelistCategory
+  panelistCategory,
+  sponsor,
 ]
