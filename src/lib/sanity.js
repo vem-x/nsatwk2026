@@ -97,4 +97,14 @@ export const queries = {
     "logo": logo.asset->url,
     website,
   }`,
+
+  judges: `*[_type == "judge"] | order(_createdAt asc) {
+    _id,
+    name,
+    title,
+    organization,
+    category,
+    bio,
+    "image": image.asset->url
+  }`,
 };

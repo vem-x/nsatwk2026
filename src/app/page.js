@@ -8,6 +8,7 @@ import Timeline from "@/components/sections/Timeline";
 import StartupShowcase from "@/components/sections/StartupShowcase";
 import Mentors from "@/components/sections/Mentors";
 import Hosts from "@/components/sections/Hosts";
+import Judges from "@/components/sections/Judges";
 import Panelist from "@/components/sections/Panelist";
 import Sponsors from "@/components/sections/Sponsors";
 import CountDown from "@/components/sections/CountDown";
@@ -31,6 +32,7 @@ export default function Home() {
         <StartupShowcase />
         <Mentors />
         <Hosts />
+        <Judges />
         <Panelist />
         <Sponsors />
         <CountDown />

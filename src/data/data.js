@@ -6,6 +6,7 @@ export const navData = {
     { text: "About", href: "#about" },
     { text: "Agenda", href: "#timeline" },
     { text: "Speakers", href: "#mentors" },
+    { text: "Judges", href: "#judges" },
     { text: "News", href: "#news" }
   ],
   ctaButton: { text: "Register Now", href: "#register" }
