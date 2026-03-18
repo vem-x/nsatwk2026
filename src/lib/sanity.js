@@ -98,6 +98,20 @@ export const queries = {
     website,
   }`,
 
+  pitchingStartups: `*[_type == "pitchingStartup"] | order(order asc) {
+    _id,
+    name,
+    founderName,
+    founderRole,
+    "founderPhoto": founderPhoto.asset->url,
+    "logo": logo.asset->url,
+    sector,
+    tagline,
+    problem,
+    pitchSlot,
+    website,
+  }`,
+
   judges: `*[_type == "judge"] | order(_createdAt asc) {
     _id,
     name,

@@ -1,5 +1,6 @@
 import host from './host'
 import startup from './startup'
+import pitchingStartup from './pitchingStartup'
 import timelineDay from './timelineDay'
 import mentor from './mentor'
 import judge from './judge'
@@ -11,6 +12,7 @@ export const schemaTypes = [
   siteSettings,
   host,
   startup,
+  pitchingStartup,
   timelineDay,
   mentor,
   judge,

@@ -11,6 +11,17 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { setShowRegistrationPopup } = useRegistration();
 
+  const handleNavClick = (e, href) => {
+    if (!href.startsWith('#')) return;
+    e.preventDefault();
+    const el = document.querySelector(href);
+    if (el) {
+      const offset = 80;
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -53,6 +64,7 @@ export default function Navbar() {
               <motion.a
                 key={link.text}
                 href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
                 className="text-gray-300 hover:text-primary transition-colors duration-200 font-medium"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -106,7 +118,7 @@ export default function Navbar() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.05 * index }}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => { handleNavClick(e, link.href); setIsMobileMenuOpen(false); }}
                 >
                   {link.text}
                 </motion.a>

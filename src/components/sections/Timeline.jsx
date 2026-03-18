@@ -21,8 +21,6 @@ function EventItem({ event }) {
         )}
       </div>
 
-      <h4 className="text-white font-bold text-base leading-snug">{event.title}</h4>
-
       {event.description && (
         <p className="text-gray-500 text-sm leading-relaxed">{event.description}</p>
       )}

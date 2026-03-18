@@ -6,6 +6,7 @@ import HeroSection from "@/components/sections/HeroSection";
 import AboutSection from "@/components/sections/AboutSection";
 import Timeline from "@/components/sections/Timeline";
 import StartupShowcase from "@/components/sections/StartupShowcase";
+import StartupPitching from "@/components/sections/StartupPitching";
 import Mentors from "@/components/sections/Mentors";
 import Hosts from "@/components/sections/Hosts";
 import Judges from "@/components/sections/Judges";
@@ -29,6 +30,7 @@ export default function Home() {
         <HeroSection />
         <AboutSection />
         <Timeline />
+        <StartupPitching />
         <StartupShowcase />
         <Mentors />
         <Hosts />

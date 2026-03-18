@@ -5,7 +5,7 @@ export const navData = {
   links: [
     { text: "About", href: "#about" },
     { text: "Agenda", href: "#timeline" },
-    { text: "Speakers", href: "#mentors" },
+    { text: "Speakers", href: "#hosts" },
     { text: "Judges", href: "#judges" },
     { text: "News", href: "#news" }
   ],
@@ -377,7 +377,7 @@ export const footerData = {
   ],
   navLinks: [
     { text: "Agenda", href: "#timeline" },
-    { text: "Speakers", href: "#mentors" },
+    { text: "Speakers", href: "#hosts" },
     { text: "Partners", href: "#panelists" }
   ]
 };
