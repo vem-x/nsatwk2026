@@ -30,7 +30,7 @@ export default function Home() {
         <HeroSection />
         <AboutSection />
         <Timeline />
-        <StartupPitching />
+        {/* <StartupPitching /> */}
         <StartupShowcase />
         <Mentors />
         <Hosts />
