@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, email, organization, role, source } = body;
+    const { name, email, phone, organization, role, source } = body;
 
     // Validate required fields
     if (!name || !email) {
@@ -32,6 +32,7 @@ export async function POST(request) {
         {
           name,
           email,
+          phone: phone || null,
           organization: organization || null,
           role: role || 'attendee',
           source: source || 'direct',
@@ -158,6 +159,12 @@ export async function POST(request) {
                                     <td style="padding: 6px 0; color: #999; font-size: 14px;">Email:</td>
                                     <td style="padding: 6px 0; color: white; font-size: 14px; font-weight: 500;">${email}</td>
                                   </tr>
+                                  ${phone ? `
+                                  <tr>
+                                    <td style="padding: 6px 0; color: #999; font-size: 14px;">Phone:</td>
+                                    <td style="padding: 6px 0; color: white; font-size: 14px; font-weight: 500;">${phone}</td>
+                                  </tr>
+                                  ` : ''}
                                   ${organization ? `
                                   <tr>
                                     <td style="padding: 6px 0; color: #999; font-size: 14px;">Organization:</td>

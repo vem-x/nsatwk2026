@@ -20,7 +20,7 @@ const inputClass =
 
 export default function RegistrationDialog() {
   const { showRegistrationPopup, setShowRegistrationPopup, registrationSource } = useRegistration();
-  const [form, setForm] = useState({ name: '', email: '', organization: '', role: 'attendee' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', organization: '', role: 'attendee' });
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const [eventInfo, setEventInfo] = useState({ date: '30–31 Mar 2026', location: 'Abuja' });
@@ -158,6 +158,16 @@ export default function RegistrationDialog() {
                             value={form.email}
                             onChange={set('email')}
                             required
+                            className={inputClass}
+                          />
+                        </div>
+
+                        <div>
+                          <input
+                            type="tel"
+                            placeholder="Phone number"
+                            value={form.phone}
+                            onChange={set('phone')}
                             className={inputClass}
                           />
                         </div>
