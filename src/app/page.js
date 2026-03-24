@@ -29,13 +29,16 @@ export default function Home() {
         <Navbar />
         <HeroSection />
         <AboutSection />
+
         <Timeline />
-        {/* <StartupPitching /> */}
+           <Hosts />
+              <Judges />
+        <StartupPitching />
         <StartupShowcase />
         <Mentors />
-        <Hosts />
-        <Judges />
-        <Panelist />
+      
+      
+        {/* <Panelist /> */}
         <Sponsors />
         <CountDown />
         <Footer />
