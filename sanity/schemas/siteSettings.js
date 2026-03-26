@@ -61,6 +61,15 @@ export default {
       title: 'Countdown Section Description',
       type: 'text',
     },
+    {
+      name: 'agendaPdf',
+      title: 'Event Agenda PDF',
+      type: 'file',
+      description: 'Upload the event agenda PDF here. The Download Agenda button on the hero will link to this file.',
+      options: {
+        accept: '.pdf',
+      },
+    },
   ],
   preview: {
     prepare() {

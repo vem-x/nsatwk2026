@@ -19,6 +19,7 @@ export default function Hero() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   const [data, setData] = useState(heroData);
+  const [agendaUrl, setAgendaUrl] = useState(null);
 
   useEffect(() => {
     fetchSanityData(queries.siteSettings)
@@ -34,6 +35,7 @@ export default function Hero() {
           videoSrc: settings.heroVideoSrc || heroData.videoSrc,
           ctaButtons: heroData.ctaButtons,
         });
+        if (settings.agendaPdfUrl) setAgendaUrl(settings.agendaPdfUrl);
       })
       .catch(() => {});
   }, []);
@@ -156,19 +158,40 @@ export default function Hero() {
             variants={itemVariants}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            {data.ctaButtons.map((button) => (
-              button.href === '#register' ? (
-                <motion.button
-                  key={button.text}
-                  onClick={() => setShowRegistrationPopup(true)}
-                  className={button.primary ? 'btn-primary' : 'btn-secondary'}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {button.icon === 'download' && <Download className="w-4 h-4 mr-2 inline" />}
-                  {button.text}
-                </motion.button>
-              ) : (
+            {data.ctaButtons.map((button) => {
+              if (button.href === '#register') {
+                return (
+                  <motion.button
+                    key={button.text}
+                    onClick={() => setShowRegistrationPopup(true)}
+                    className={button.primary ? 'btn-primary' : 'btn-secondary'}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {button.text}
+                  </motion.button>
+                );
+              }
+
+              if (button.icon === 'download') {
+                return agendaUrl ? (
+                  <motion.a
+                    key={button.text}
+                    href={agendaUrl}
+                    download="NSATWK2026-Agenda.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={button.primary ? 'btn-primary' : 'btn-secondary'}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Download className="w-4 h-4 mr-2 inline" />
+                    {button.text}
+                  </motion.a>
+                ) : null;
+              }
+
+              return (
                 <motion.a
                   key={button.text}
                   href={button.href}
@@ -176,11 +199,10 @@ export default function Hero() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {button.icon === 'download' && <Download className="w-4 h-4 mr-2 inline" />}
                   {button.text}
                 </motion.a>
-              )
-            ))}
+              );
+            })}
           </motion.div>
         </motion.div>
 

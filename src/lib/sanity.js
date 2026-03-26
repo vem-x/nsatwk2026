@@ -33,6 +33,7 @@ export const queries = {
     eventStartDate,
     countdownTitle,
     countdownDescription,
+    "agendaPdfUrl": agendaPdf.asset->url,
   }`,
 
   hosts: `*[_type == "host"] | order(_createdAt asc) {
