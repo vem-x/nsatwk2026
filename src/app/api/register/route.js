@@ -71,10 +71,24 @@ export async function POST(request) {
       const siteSettings = await fetchSanityData(queries.siteSettings).catch(() => null);
       const agendaPdfUrl = siteSettings?.agendaPdfUrl || null;
 
+      // Fetch pass image for attachment
+      let passImageBuffer = null;
+      try {
+        const imgRes = await fetch(`${baseUrl}/api/pass/${data.id}/image`);
+        if (imgRes.ok) passImageBuffer = Buffer.from(await imgRes.arrayBuffer());
+      } catch (_) {}
+
       await transporter.sendMail({
         from: `"Nigeria Satellite Week" <${process.env.SMTP_USER}>`,
         to: email,
         subject: '🛰️ Welcome to NSATWK2026 - Registration Confirmed',
+        attachments: passImageBuffer ? [
+          {
+            filename: `nsatwk2026-pass-${name.replace(/\s+/g, '-').toLowerCase()}.png`,
+            content: passImageBuffer,
+            contentType: 'image/png',
+          },
+        ] : [],
         html: `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -147,17 +161,6 @@ export async function POST(request) {
                 </tr>
               </table>
 
-              <!-- Pass image -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:0 0 24px;">
-                <tr>
-                  <td>
-                    <a href="${passUrl}" style="display:block;text-decoration:none;">
-                      <img src="${baseUrl}/api/pass/${data.id}/image" alt="Your Digital Pass — ${name}" width="520" style="width:100%;max-width:520px;display:block;border-radius:6px;" />
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
               <!-- CTA -->
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate;border-spacing:0;">
                 <tr>
@@ -173,6 +176,9 @@ export async function POST(request) {
               </table>
 
               <p style="margin:32px 0 0;font-size:14px;color:#555555;line-height:1.6;">
+                Your digital pass is attached to this email as a PNG file. You can also view and share it online using the button above.
+              </p>
+              <p style="margin:12px 0 0;font-size:14px;color:#555555;line-height:1.6;">
                 If you have any questions, please reach us at <a href="mailto:satelliteweek@nigcomsat.gov.ng" style="color:#089259;text-decoration:none;">satelliteweek@nigcomsat.gov.ng</a>.
               </p>
             </td>
