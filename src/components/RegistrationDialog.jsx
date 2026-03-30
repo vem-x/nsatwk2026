@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import { X, ArrowRight, Loader2 } from 'lucide-react';
 import { useRegistration } from '@/contexts/RegistrationContext';
 import { fetchSanityData, queries } from '@/lib/sanity';
 
@@ -23,6 +23,8 @@ export default function RegistrationDialog() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', organization: '', role: 'attendee' });
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [errorPassId, setErrorPassId] = useState(null);
+  const [passId, setPassId] = useState(null);
   const [eventInfo, setEventInfo] = useState({ date: '30–31 Mar 2026', location: 'Abuja' });
   const firstInputRef = useRef(null);
 
@@ -62,6 +64,7 @@ export default function RegistrationDialog() {
 
     setStatus('loading');
     setErrorMsg('');
+    setErrorPassId(null);
 
     try {
       const res = await fetch('/api/register', {
@@ -70,7 +73,13 @@ export default function RegistrationDialog() {
         body: JSON.stringify({ ...form, source: registrationSource || 'direct' }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Registration failed');
+      if (!res.ok) {
+        setStatus('error');
+        setErrorMsg(data.error || 'Registration failed');
+        if (res.status === 409 && data.passId) setErrorPassId(data.passId);
+        return;
+      }
+      setPassId(data.data?.id || null);
       setStatus('success');
     } catch (err) {
       setStatus('error');
@@ -120,7 +129,7 @@ export default function RegistrationDialog() {
               <div className="p-6 sm:p-8">
                 <AnimatePresence mode="wait">
                   {status === 'success' ? (
-                    <SuccessState key="success" name={form.name} onClose={close} />
+                    <SuccessState key="success" name={form.name} passId={passId} onClose={close} />
                   ) : (
                     <motion.div
                       key="form"
@@ -133,8 +142,11 @@ export default function RegistrationDialog() {
                           NSATWK 2026 · {eventInfo.date}, {eventInfo.location}
                         </p>
                         <h3 className="font-display text-xl font-bold text-white">
-                          Register for Nigerian Satellite Week
+                          On-site Registration
                         </h3>
+                        <p className="text-white/40 text-xs mt-1">
+                          Walk-in check-in · Get your digital pass instantly
+                        </p>
                       </div>
 
                       {/* Form */}
@@ -194,13 +206,23 @@ export default function RegistrationDialog() {
                         </div>
 
                         {status === 'error' && (
-                          <motion.p
+                          <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="text-red-400 text-xs py-2.5 px-3 rounded-lg bg-red-500/10 border border-red-500/15"
+                            className="text-red-400 text-xs py-2.5 px-3 rounded-lg bg-red-500/10 border border-red-500/15 space-y-1"
                           >
-                            {errorMsg}
-                          </motion.p>
+                            <p>{errorMsg}</p>
+                            {errorPassId && (
+                              <a
+                                href={`/pass/${errorPassId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-primary underline underline-offset-2 hover:text-primary/80 transition-colors"
+                              >
+                                View your digital pass <ArrowRight size={11} />
+                              </a>
+                            )}
+                          </motion.div>
                         )}
 
                         <button
@@ -237,39 +259,49 @@ export default function RegistrationDialog() {
   );
 }
 
-function SuccessState({ name, onClose }) {
+function SuccessState({ name, passId, onClose }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col items-center text-center py-6"
+      className="flex flex-col py-6"
     >
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', stiffness: 250, damping: 20, delay: 0.1 }}
-        className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center mb-5"
-      >
-        <CheckCircle size={24} className="text-primary" />
-      </motion.div>
-
-      <h3 className="font-display text-xl font-bold text-white mb-1.5">You're in!</h3>
-      <p className="text-white/40 text-sm mb-8">
-        Welcome, <span className="text-white/70">{name}</span>. Check your inbox for details.
+      <h3 className="font-display text-xl font-bold text-white mb-1.5">You're checked in!</h3>
+      <p className="text-white/40 text-sm mb-1">
+        Welcome, <span className="text-white/70">{name}</span>.
+      </p>
+      <p className="text-white/30 text-xs mb-6">
+        A confirmation has been sent to your email.
       </p>
 
-      <div className="flex gap-3 w-full">
-        <button onClick={onClose} className="flex-1 btn-primary text-sm">
-          Done
-        </button>
-        <a
-          href="#timeline"
-          onClick={onClose}
-          className="flex-1 btn-secondary text-center text-sm"
-        >
-          View Agenda
-        </a>
+      <div className="flex flex-col gap-3">
+        {passId && (
+          <a
+            href={`/pass/${passId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className="inline-flex items-center gap-1.5 text-sm text-primary underline underline-offset-2 hover:text-primary/80 transition-colors w-fit"
+          >
+            Get your digital pass <ArrowRight size={13} />
+          </a>
+        )}
+        <div className="flex gap-4">
+          <a
+            href="#timeline"
+            onClick={onClose}
+            className="text-sm text-white/40 hover:text-white/60 transition-colors underline underline-offset-2"
+          >
+            View agenda
+          </a>
+          <button
+            onClick={onClose}
+            className="text-sm text-white/40 hover:text-white/60 transition-colors"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </motion.div>
   );

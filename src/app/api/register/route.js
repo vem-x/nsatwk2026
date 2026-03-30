@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { fetchSanityData, queries } from '@/lib/sanity';
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
@@ -45,8 +46,13 @@ export async function POST(request) {
     if (error) {
       console.error('Supabase error:', error);
       if (error.code === '23505') {
+        const { data: existing } = await supabaseAdmin
+          .from('registrations')
+          .select('id')
+          .eq('email', email)
+          .single();
         return NextResponse.json(
-          { error: 'This email is already registered. See you at the event!' },
+          { error: 'This email is already registered. See you at the event!', passId: existing?.id || null },
           { status: 409 }
         );
       }
@@ -58,193 +64,136 @@ export async function POST(request) {
 
     // Send confirmation email via SMTP
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nsatwk.com';
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nigeriansatelliteweek.ng';
+      const passUrl = `${baseUrl}/pass/${data.id}`;
       const logoUrl = `${baseUrl}/logo.png`;
+
+      const siteSettings = await fetchSanityData(queries.siteSettings).catch(() => null);
+      const agendaPdfUrl = siteSettings?.agendaPdfUrl || null;
 
       await transporter.sendMail({
         from: `"Nigeria Satellite Week" <${process.env.SMTP_USER}>`,
         to: email,
         subject: '🛰️ Welcome to NSATWK2026 - Registration Confirmed',
-        html: `
-          <!DOCTYPE html>
-          <html lang="en">
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <meta http-equiv="X-UA-Compatible" content="IE=edge">
-              <title>NSATWK2026 Registration Confirmation</title>
-              <!--[if mso]>
-              <style type="text/css">
-                body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
-              </style>
-              <![endif]-->
-            </head>
-            <body style="margin: 0; padding: 0; background-color: #0a0a0a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-              <!-- Wrapper -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #0a0a0a;">
+        html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NSATWK 2026 — Registration Confirmed</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#f4f4f4;padding:32px 16px;">
+    <tr>
+      <td>
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" align="center" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:4px;overflow:hidden;">
+
+          <!-- Header bar -->
+          <tr>
+            <td style="background:#089259;padding:32px 40px;">
+              <img src="${logoUrl}" alt="NSATWK" width="52" height="52" style="display:block;margin-bottom:16px;" />
+              <p style="margin:0;color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Nigeria Satellite Week</p>
+              <h1 style="margin:6px 0 0 0;color:#ffffff;font-size:22px;font-weight:700;line-height:1.3;">Registration Confirmed</h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <p style="margin:0 0 20px;font-size:15px;color:#333333;line-height:1.6;">Dear ${name},</p>
+              <p style="margin:0 0 20px;font-size:15px;color:#333333;line-height:1.6;">
+                Thank you for registering for <strong>Nigeria Satellite Week 2026</strong>. Your spot is confirmed and we look forward to welcoming you.
+              </p>
+
+              <!-- Details block -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#f9f9f9;border-left:3px solid #089259;margin:24px 0;">
                 <tr>
-                  <td style="padding: 40px 20px;">
-                    <!-- Main Container -->
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #111111; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(8, 146, 89, 0.3);">
-
-                      <!-- Space Header with Stars -->
+                  <td style="padding:20px 24px;">
+                    <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#089259;">Your Details</p>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                       <tr>
-                        <td style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); padding: 0; position: relative; height: 200px; text-align: center;">
-                          <!-- Animated Stars Background -->
-                          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden;">
-                            <div style="position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; top: 20%; left: 10%; opacity: 0.8;"></div>
-                            <div style="position: absolute; width: 1px; height: 1px; background: white; border-radius: 50%; top: 40%; left: 20%; opacity: 0.6;"></div>
-                            <div style="position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; top: 15%; left: 80%; opacity: 0.9;"></div>
-                            <div style="position: absolute; width: 1px; height: 1px; background: white; border-radius: 50%; top: 60%; left: 70%; opacity: 0.7;"></div>
-                            <div style="position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; top: 80%; left: 15%; opacity: 0.5;"></div>
-                            <div style="position: absolute; width: 1px; height: 1px; background: white; border-radius: 50%; top: 30%; left: 90%; opacity: 0.8;"></div>
-                            <div style="position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; top: 70%; left: 50%; opacity: 0.6;"></div>
-                            <div style="position: absolute; width: 1px; height: 1px; background: white; border-radius: 50%; top: 50%; left: 30%; opacity: 0.9;"></div>
-                            <div style="position: absolute; width: 2px; height: 2px; background: #089259; border-radius: 50%; top: 25%; left: 60%; opacity: 0.7; box-shadow: 0 0 4px #089259;"></div>
-                            <div style="position: absolute; width: 1px; height: 1px; background: #089259; border-radius: 50%; top: 85%; left: 85%; opacity: 0.8; box-shadow: 0 0 3px #089259;"></div>
-                          </div>
-
-                          <!-- Satellite SVG -->
-                          <div style="position: absolute; top: 20px; right: 30px; opacity: 0.6;">
-                            <svg width="60" height="60" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <rect x="20" y="24" width="24" height="16" fill="#089259" opacity="0.8"/>
-                              <rect x="16" y="26" width="4" height="12" fill="#089259"/>
-                              <rect x="44" y="26" width="4" height="12" fill="#089259"/>
-                              <line x1="12" y1="32" x2="4" y2="32" stroke="#089259" stroke-width="2"/>
-                              <line x1="52" y1="32" x2="60" y2="32" stroke="#089259" stroke-width="2"/>
-                              <circle cx="32" cy="32" r="4" fill="#0ab36f"/>
-                            </svg>
-                          </div>
-
-                          <!-- Logo and Title -->
-                          <div style="position: relative; padding-top: 60px;">
-                            <img src="${logoUrl}" alt="NSATWK2026" style="width: 80px; height: auto; margin-bottom: 10px;" />
-                            <h1 style="color: white; margin: 10px 0 5px 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">NSATWK2026</h1>
-                            <p style="color: #089259; margin: 0; font-size: 14px; font-weight: 600; letter-spacing: 2px;">NIGERIA SATELLITE WEEK</p>
-                          </div>
-                        </td>
+                        <td style="padding:5px 0;font-size:13px;color:#888888;width:110px;vertical-align:top;">Name</td>
+                        <td style="padding:5px 0;font-size:13px;color:#111111;font-weight:600;">${name}</td>
                       </tr>
-
-                      <!-- Success Badge -->
                       <tr>
-                        <td style="padding: 0;">
-                          <div style="background: linear-gradient(90deg, transparent, rgba(8, 146, 89, 0.2), transparent); padding: 20px; text-align: center; border-top: 1px solid rgba(8, 146, 89, 0.3); border-bottom: 1px solid rgba(8, 146, 89, 0.3);">
-                            <div style="display: inline-block; background: rgba(8, 146, 89, 0.2); border: 2px solid #089259; border-radius: 50px; padding: 8px 24px;">
-                              <span style="color: #0ab36f; font-size: 14px; font-weight: 600;">✓ REGISTRATION CONFIRMED</span>
-                            </div>
-                          </div>
-                        </td>
+                        <td style="padding:5px 0;font-size:13px;color:#888888;vertical-align:top;">Email</td>
+                        <td style="padding:5px 0;font-size:13px;color:#111111;">${email}</td>
                       </tr>
-
-                      <!-- Main Content -->
+                      ${organization ? `
                       <tr>
-                        <td style="padding: 40px 30px; color: #e0e0e0;">
-                          <h2 style="color: #089259; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">Welcome, ${name}! 🚀</h2>
-
-                          <p style="color: #e0e0e0; line-height: 1.6; margin: 0 0 20px 0; font-size: 16px;">
-                            You're officially registered for <strong style="color: white;">Nigeria's premier Satellite Week 2026</strong>. Get ready to explore the future of space technology and innovation!
-                          </p>
-
-                          <!-- Registration Details Card -->
-                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: rgba(8, 146, 89, 0.05); border-left: 4px solid #089259; border-radius: 8px; margin: 30px 0;">
-                            <tr>
-                              <td style="padding: 25px;">
-                                <h3 style="color: #0ab36f; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Your Registration Details</h3>
-                                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                                  <tr>
-                                    <td style="padding: 6px 0; color: #999; font-size: 14px; width: 100px;">Name:</td>
-                                    <td style="padding: 6px 0; color: white; font-size: 14px; font-weight: 500;">${name}</td>
-                                  </tr>
-                                  <tr>
-                                    <td style="padding: 6px 0; color: #999; font-size: 14px;">Email:</td>
-                                    <td style="padding: 6px 0; color: white; font-size: 14px; font-weight: 500;">${email}</td>
-                                  </tr>
-                                  ${phone ? `
-                                  <tr>
-                                    <td style="padding: 6px 0; color: #999; font-size: 14px;">Phone:</td>
-                                    <td style="padding: 6px 0; color: white; font-size: 14px; font-weight: 500;">${phone}</td>
-                                  </tr>
-                                  ` : ''}
-                                  ${organization ? `
-                                  <tr>
-                                    <td style="padding: 6px 0; color: #999; font-size: 14px;">Organization:</td>
-                                    <td style="padding: 6px 0; color: white; font-size: 14px; font-weight: 500;">${organization}</td>
-                                  </tr>
-                                  ` : ''}
-                                  <tr>
-                                    <td style="padding: 6px 0; color: #999; font-size: 14px;">Role:</td>
-                                    <td style="padding: 6px 0; color: #089259; font-size: 14px; font-weight: 600; text-transform: capitalize;">${role}</td>
-                                  </tr>
-                                </table>
-                              </td>
-                            </tr>
-                          </table>
-
-                          <!-- Event Details -->
-                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 30px 0;">
-                            <tr>
-                              <td style="padding: 20px; background: #1a1a1a; border-radius: 8px; border: 1px solid rgba(8, 146, 89, 0.2);">
-                                <h3 style="color: white; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">📅 Event Information</h3>
-                                <p style="color: #e0e0e0; margin: 8px 0; font-size: 15px; line-height: 1.5;">
-                                  <strong style="color: #089259;">📍 Venue:</strong> Abuja Continental Hotel, Abuja<br>
-                                  <strong style="color: #089259;">📅 Date:</strong> February 27-28, 2026<br>
-                                  <strong style="color: #089259;">🕐 Time:</strong> 9:00 AM onwards
-                                </p>
-                              </td>
-                            </tr>
-                          </table>
-
-                          <!-- What's Next Section -->
-                          <div style="background: linear-gradient(135deg, rgba(8, 146, 89, 0.1), rgba(8, 146, 89, 0.05)); padding: 20px; border-radius: 8px; margin: 30px 0; border: 1px solid rgba(8, 146, 89, 0.2);">
-                            <h3 style="color: #0ab36f; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">🎯 What's Next?</h3>
-                            <ul style="color: #e0e0e0; line-height: 1.8; margin: 0; padding-left: 20px; font-size: 15px;">
-                              <li>Check your email for event updates</li>
-                              <li>Receive your event badge details soon</li>
-                              <li>Download the event agenda when available</li>
-                              <li>Connect with fellow attendees</li>
-                            </ul>
-                          </div>
-
-                          <!-- CTA Button -->
-                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 35px 0;">
-                            <tr>
-                              <td align="center">
-                                <a href="${baseUrl}" style="display: inline-block; background: #089259; color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(8, 146, 89, 0.4);">
-                                  Visit Event Website
-                                </a>
-                              </td>
-                            </tr>
-                          </table>
-
-                          <p style="color: #999; font-size: 14px; line-height: 1.6; margin: 30px 0 0 0; text-align: center;">
-                            Questions? Contact us at <a href="mailto:satelliteweek@nigcomsat.gov.ng" style="color: #089259; text-decoration: none;">satelliteweek@nigcomsat.gov.ng</a>
-                          </p>
-                        </td>
-                      </tr>
-
-                      <!-- Footer -->
+                        <td style="padding:5px 0;font-size:13px;color:#888888;vertical-align:top;">Organisation</td>
+                        <td style="padding:5px 0;font-size:13px;color:#111111;">${organization}</td>
+                      </tr>` : ''}
+                      ${phone ? `
                       <tr>
-                        <td style="background: #0a0a0a; padding: 30px; text-align: center; border-top: 1px solid rgba(8, 146, 89, 0.2);">
-                          <p style="color: #666; font-size: 12px; margin: 0 0 10px 0; line-height: 1.5;">
-                            © ${new Date().getFullYear()} Nigeria Satellite Week. All rights reserved.<br>
-                            Harnessing AI & Space Technologies for Nigeria's Digital Economy
-                          </p>
-                          <div style="margin-top: 15px;">
-                            <a href="${baseUrl}" style="color: #089259; text-decoration: none; font-size: 12px; margin: 0 10px;">Website</a>
-                            <span style="color: #333;">|</span>
-                            <a href="${baseUrl}/#about" style="color: #089259; text-decoration: none; font-size: 12px; margin: 0 10px;">About</a>
-                            <span style="color: #333;">|</span>
-                            <a href="${baseUrl}/#timeline" style="color: #089259; text-decoration: none; font-size: 12px; margin: 0 10px;">Agenda</a>
-                          </div>
-                        </td>
-                      </tr>
+                        <td style="padding:5px 0;font-size:13px;color:#888888;vertical-align:top;">Phone</td>
+                        <td style="padding:5px 0;font-size:13px;color:#111111;">${phone}</td>
+                      </tr>` : ''}
                     </table>
                   </td>
                 </tr>
               </table>
-            </body>
-          </html>
-        `,
+
+              <!-- Event info -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:0 0 28px;">
+                <tr>
+                  <td style="padding:5px 0;font-size:14px;color:#333333;"><strong style="color:#089259;display:inline-block;width:64px;">Date</strong> 30 – 31 March 2026</td>
+                </tr>
+                <tr>
+                  <td style="padding:5px 0;font-size:14px;color:#333333;"><strong style="color:#089259;display:inline-block;width:64px;">Venue</strong> Abuja Continental Hotel, Abuja</td>
+                </tr>
+                <tr>
+                  <td style="padding:5px 0;font-size:14px;color:#333333;"><strong style="color:#089259;display:inline-block;width:64px;">Time</strong> 9:00 AM onwards</td>
+                </tr>
+              </table>
+
+              <!-- Pass image -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:0 0 24px;">
+                <tr>
+                  <td>
+                    <a href="${passUrl}" style="display:block;text-decoration:none;">
+                      <img src="${baseUrl}/api/pass/${data.id}/image" alt="Your Digital Pass — ${name}" width="520" style="width:100%;max-width:520px;display:block;border-radius:6px;" />
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate;border-spacing:0;">
+                <tr>
+                  <td style="border-radius:4px;background:#089259;">
+                    <a href="${passUrl}" style="display:inline-block;padding:14px 32px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:4px;">View Your Digital Pass</a>
+                  </td>
+                  ${agendaPdfUrl ? `
+                  <td width="12"></td>
+                  <td style="border-radius:4px;border:1px solid #089259;">
+                    <a href="${agendaPdfUrl}" style="display:inline-block;padding:14px 32px;color:#089259;font-size:14px;font-weight:700;text-decoration:none;border-radius:4px;">Download Agenda</a>
+                  </td>` : ''}
+                </tr>
+              </table>
+
+              <p style="margin:32px 0 0;font-size:14px;color:#555555;line-height:1.6;">
+                If you have any questions, please reach us at <a href="mailto:satelliteweek@nigcomsat.gov.ng" style="color:#089259;text-decoration:none;">satelliteweek@nigcomsat.gov.ng</a>.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 40px;border-top:1px solid #eeeeee;">
+              <p style="margin:0;font-size:12px;color:#999999;line-height:1.6;">
+                &copy; ${new Date().getFullYear()} NIGCOMSAT Limited &nbsp;&middot;&nbsp;
+                <a href="${baseUrl}" style="color:#089259;text-decoration:none;">nigeriansatelliteweek.ng</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
       });
     } catch (emailError) {
       console.error('Email sending error:', emailError);

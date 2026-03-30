@@ -12,7 +12,9 @@
       "Bash(dir:*)",
       "mcp__ide__getDiagnostics",
       "Bash(node:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(nslookup mail.govmail.gbb.com.ng)",
+      "Bash(ping -n 1 mail.govmail.gbb.com.ng)"
     ]
   }
 }
